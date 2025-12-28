@@ -38,17 +38,21 @@ def data_cleaner(
         before = df["STORE_LOCATION"].astype("string")
         after = before.map(clean_store_location).astype("string")
         df["STORE_LOCATION"] = after
-        change_summary["store_location_changed_rows"] = int((before != after).fillna(False).sum())
+        change_summary["store_location_changed_rows"] = int(
+            (before != after).fillna(False).sum()
+        )
 
     # PRODUCT_ID
     if "PRODUCT_ID" in df.columns:
         before = df["PRODUCT_ID"].astype("string")
         after = before.map(clean_product_id).astype("string")
         df["PRODUCT_ID"] = after
-        change_summary["product_id_changed_rows"] = int((before != after).fillna(False).sum())
+        change_summary["product_id_changed_rows"] = int(
+            (before != after).fillna(False).sum()
+        )
 
     # Currency columns
-    currency_cols = [c for c in ["MRP", "CP", "DISCOUNT", "SP"] if c in df.columns]
+    currency_cols = [c for c in ["MRP", "CP", "DISCOUNT", "SP"] if c in df.columns] # noqa: E501
     currency_converted = {}
     for col in currency_cols:
         before = df[col].astype("string")
