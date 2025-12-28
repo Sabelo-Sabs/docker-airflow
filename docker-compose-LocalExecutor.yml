@@ -46,6 +46,7 @@ services:
       start_period: 5s
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
+      - ./store_files:/store_files_postgres
     restart: always
     logging:
       options:
