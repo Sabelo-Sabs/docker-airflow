@@ -20,6 +20,15 @@ x-airflow-common: &airflow-common
     AIRFLOW__SMTP__SMTP_STARTTLS: "false"
     AIRFLOW__SMTP__SMTP_SSL: "false"
     AIRFLOW__SMTP__SMTP_MAIL_FROM: "airflow@local.test"
+
+    # --- Fix Codespaces URL (prevents :8080 being appended) ---
+    AIRFLOW__WEBSERVER__BASE_URL: "https://${CODESPACE_NAME}-8080.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
+    AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX: "true"
+    AIRFLOW__WEBSERVER__PROXY_FIX_X_FOR: "1"
+    AIRFLOW__WEBSERVER__PROXY_FIX_X_PROTO: "1"
+    AIRFLOW__WEBSERVER__PROXY_FIX_X_HOST: "1"
+    AIRFLOW__WEBSERVER__PROXY_FIX_X_PORT: "1"
+
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
@@ -53,7 +62,6 @@ services:
         max-size: 10m
         max-file: "3"
 
-  # --- Added: MailHog (SMTP sink + UI) ---
   mailhog:
     image: mailhog/mailhog:latest
     ports:
@@ -72,7 +80,6 @@ services:
     command:
       - -c
       - |
-        # Call the original Airflow entrypoint with a valid command
         exec /entrypoint airflow version
     environment:
       <<: *airflow-common-env
