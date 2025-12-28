@@ -1,3 +1,5 @@
+version: "3.8"
+
 x-airflow-common: &airflow-common
   image: apache/airflow:2.10.5
   # Run as root in dev to avoid permission issues on mounted folders
@@ -10,10 +12,20 @@ x-airflow-common: &airflow-common
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: ""
+
+    # --- Minimal MailHog SMTP config (for local email testing) ---
+    AIRFLOW__EMAIL__EMAIL_BACKEND: airflow.utils.email.send_email_smtp
+    AIRFLOW__SMTP__SMTP_HOST: mailhog
+    AIRFLOW__SMTP__SMTP_PORT: "1025"
+    AIRFLOW__SMTP__SMTP_STARTTLS: "false"
+    AIRFLOW__SMTP__SMTP_SSL: "false"
+    AIRFLOW__SMTP__SMTP_MAIL_FROM: "airflow@local.test"
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
     - ./plugins:/opt/airflow/plugins
+    - ./sql_files:/opt/airflow/sql_files
+    - ./store_files:/opt/airflow/store_files
   logging:
     options:
       max-size: 10m
@@ -34,6 +46,18 @@ services:
       start_period: 5s
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
+    restart: always
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # --- Added: MailHog (SMTP sink + UI) ---
+  mailhog:
+    image: mailhog/mailhog:latest
+    ports:
+      - "8025:8025"   # Web UI: http://localhost:8025
+      - "1025:1025"   # SMTP
     restart: always
     logging:
       options:
